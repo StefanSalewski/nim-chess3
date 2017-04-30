@@ -1,0 +1,122 @@
+== Nim Chess 3
+:experimental:
+:imagesdir: http://ssalewski.de/tmp
+(c) Stefan Salewski +
+Version 0.4, 30-APR-2017
+
+Nim Chess 3 is a simple chess game written from scratch in Nim language with a basic GTK3 GUI.
+
+This is the third version. While the first release was basically a test for the Nim GTK3 bindings, and
+the second release added a transposition table based on tables module from Nim's standard library,
+this one uses a custom hash table. This restricts memory consumption drastically. Current version
+uses about 340 MB of RAM, so playing on older hardware is no problem any more.
+
+Additional I have tried to improve the code of the chess engine, so playing strength may be stronger, and
+the basic GTK3 GUI indicates the position of last moved piece.
+
+=== Visual appearance
+
+image::nimchess_0.2.png[]
+
+=== Properties
+
+- written in Nim language
+- basic GTK3 GUI
+- only 1200 lines of code
+- move generation is based on an old gnuchess idea
+- core component is of course alpha-beta-prunning
+- a transposition table is used to reuse old results
+
+With a time limit of a few seconds per move computation is generally 7 ply deep
+full width, with additional full capture analyses (quiescence search).  Special moves
+like chess offers or captures are now deep extended, which should further increase
+playing strength, but I have not really verified that.
+In endgame
+deep of 10 ply and more is archived -- now even the most difficult endgame
+king vs king/bishop/knight is solved in few moves/seconds. And I have added a set based
+history to prevent engine from repeating old positions.
+
+Of course an opening library would increase playing strength, but I do not enjoy playing
+against a database too much, so I do not really intend to add one.
+
+The graphical user interface is very basic currently -- we play with white pieces against
+computer. No undo, no hints. For next game we have to restart the program.
+
+Maybe some day I will provide a more complete GUI. At least setting time limit and
+choosing side would be nice. That is really not much work, but not very interesting.
+
+Parallel computing would be interesting too, but the engine is strong already, and of
+course parallel computing would increase power consumption, so maybe it is not that
+useful.
+
+For this release we need at least Nim v 0.16.1.
+
+=== Install
+
+For Linux:
+
+----
+cd
+mkdir ngtk3
+cd ngtk3
+
+git clone https://github.com/ngtk3/common
+git clone https://github.com/ngtk3/nim-atk
+git clone https://github.com/ngtk3/nim-cairo
+git clone https://github.com/ngtk3/nim-gdk3
+git clone https://github.com/ngtk3/nim-gdk_pixbuf
+git clone https://github.com/ngtk3/nim-gio
+git clone https://github.com/ngtk3/nim-glib
+git clone https://github.com/ngtk3/nim-gobject
+git clone https://github.com/ngtk3/nim-gtk3
+git clone https://github.com/ngtk3/nim-gtksourceview
+git clone https://github.com/ngtk3/nim-pango
+git clone https://github.com/stefansalewski/nim-chess3
+
+cd nim-chess3
+
+ln -s ~/ngtk3/nim-gio/src/gio.nim
+ln -s ~/ngtk3/nim-atk/src/atk.nim
+ln -s ~/ngtk3/nim-glib/src/glib.nim
+ln -s ~/ngtk3/nim-gdk3/src/gdk3.nim
+ln -s ~/ngtk3/nim-gtk3/src/gtk3.nim
+ln -s ~/ngtk3/nim-gtksourceview/src/gtksource.nim
+ln -s ~/ngtk3/nim-gobject/src/gobject.nim
+ln -s ~/ngtk3/nim-cairo/src/cairo.nim
+ln -s ~/ngtk3/nim-cairo/src/cairo_pragma.nim
+ln -s ~/ngtk3/nim-pango/src/pango.nim
+ln -s ~/ngtk3/nim-pango/src/pango_cairo.nim
+ln -s ~/ngtk3/nim-gdk_pixbuf/src/gdk_pixbuf.nim
+
+nim c -d:release board.nim
+
+./board
+----
+
+The shipped nim.cfg file is this:
+
+----
+$ cat nim-chess3/nim.cfg 
+path:"$projectdir"
+nimcache:"/tmp/$projectdir"
+gcc.options.speed = "-march=native  -O3  -flto -fstrict-aliasing"
+----
+
+With gcc 6.3 this seems to generate the fastest executable with only 108 kB in size.
+You may try your own options -- and maybe do first built without -d:release flag
+to check for bugs.
+
+
+It may be possible to use it on Windows as well, for MacOSX installation
+seems to fail, as someone in Nim forum reported.
+
+Of course support of installation by nimble package manager would be nice.
+But there are still the name conflicts of GTK3 related modules with the legacy GTK2
+shipped with Nim. Some months ago I started working on a new, gobject instrospection based
+higher level GTK3 wrapper called nim-gi. So the name is different, and it may be possible 
+to use nimble install with that module. But unfortunately that wrapper still needs much work.
+
+The older nim-chess releases 1 and 2 are still available at https://github.com/ngtk3 -- I intend
+to delete them when this release is a bit more tested.
+
+
